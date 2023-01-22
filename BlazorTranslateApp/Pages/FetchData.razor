@@ -1,0 +1,69 @@
+﻿@page "/fetchdata"
+@using BlazorTranslateApp.Services
+@inject GoogleTranslateService TranslateService; 
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+
+<div>
+    <p>source language: </p>
+    <select  @bind="@sourceLanguage">
+        @foreach (var lang in Languages)
+        {
+            <option value="@lang">@lang</option>
+        }
+    </select>
+</div>
+<div>
+    <p>source text: </p>
+    <textarea @bind="@sourceText">
+
+</textarea>
+</div>
+<div>
+    <p>target language: </p>
+    <select @bind="@targetLanguage">
+        @foreach (var lang in Languages)
+        {
+            <option value="@lang">@lang</option>
+        }
+    </select>
+
+</div>
+
+<div>
+    <button @onclick="Translate" >translate</button>
+</div>
+<div>
+<textarea @bind="@targetText"></textarea>
+</div>
+
+
+@code {
+    private List<string> Languages = new();
+
+    string sourceLanguage = "";
+    string targetLanguage = "";
+
+    string sourceText = "";
+    string targetText = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await foreach (var lang in TranslateService.Languages())
+        {
+            Languages.Add(lang);
+        }
+    }
+
+    private async void Translate()
+    {
+        await InvokeAsync(async () => targetText = await TranslateService.Translate(sourceText, targetLanguage, sourceLanguage));
+        
+    }
+
+}
