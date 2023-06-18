@@ -1,17 +1,16 @@
-﻿@page "/fetchdata"
+﻿@page "/translateText"
 @using BlazorTranslateApp.Services
+@using System.ComponentModel.DataAnnotations
 @inject GoogleTranslateService TranslateService; 
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>Translator</PageTitle>
 
-<h1>Weather forecast</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
-
+<p>This component demonstrates how to use google translate API to translate text</p>
 
 <div>
     <p>source language: </p>
-    <select  @bind="@sourceLanguage">
+    <select @bind="@sourceLanguage">
         @foreach (var lang in Languages)
         {
             <option value="@lang">@lang</option>
@@ -20,9 +19,7 @@
 </div>
 <div>
     <p>source text: </p>
-    <textarea @bind="@sourceText">
-
-</textarea>
+    <textarea @bind="@sourceText" ></textarea>
 </div>
 <div>
     <p>target language: </p>
@@ -36,17 +33,18 @@
 </div>
 
 <div>
-    <button @onclick="Translate" >translate</button>
+    <button @onclick="TranslateText">translate</button>
 </div>
 <div>
-<textarea @bind="@targetText"></textarea>
+    <textarea @bind="@targetText"></textarea>
 </div>
 
 
 @code {
     private List<string> Languages = new();
-
+    
     string sourceLanguage = "";
+
     string targetLanguage = "";
 
     string sourceText = "";
@@ -60,9 +58,9 @@
         }
     }
 
-    private async void Translate()
+    private async void TranslateText()
     {
-        await InvokeAsync(async () => targetText = await TranslateService.Translate(sourceText, targetLanguage, sourceLanguage));
+        await InvokeAsync(async () => targetText = await TranslateService.TranslateText(sourceText, targetLanguage, sourceLanguage));
         
     }
 

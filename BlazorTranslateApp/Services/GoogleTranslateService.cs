@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using BlazorTranslateApp.Services.Models;
+using Newtonsoft.Json;
 
 namespace BlazorTranslateApp.Services;
 
@@ -17,7 +18,7 @@ public class GoogleTranslateService
         client = new();
         client.DefaultRequestHeaders.Add("X-RapidAPI-Key", key);
         client.DefaultRequestHeaders.Add("X-RapidAPI-Host", host);
-        client.BaseAddress = new Uri(endpoint);
+        client.BaseAddress = new (endpoint);
     }
 
 
@@ -40,21 +41,34 @@ public class GoogleTranslateService
 
     public async Task<string> Detect(string text)
     {
-        dynamic? response = await client.PostAsJsonAsync("detect", new {q = text});
-        response?.EnsureSuccessStatusCode();
-        if(response?.Content is {} content){
-            var body = await content.ReadAsStringAsync();
-            dynamic firstDetection = body.data.detections.FirstOrDefault();
-            return firstDetection.language;
-        }
-        else
+        var response = await client.PostAsync("detect",new FormUrlEncodedContent(new KeyValuePair<string, string>[]
         {
-            Console.WriteLine("Invalid response!");
-            return "en";
+            new ("q",text)
+        }));
+        try
+        {
+            response.EnsureSuccessStatusCode();
+            if (response.Content is { } content)
+            {
+                dynamic body = JsonConvert.SerializeObject(await content.ReadAsStringAsync());
+                
+                dynamic firstDetection = body.data.detections.FirstOrDefault();
+                return firstDetection.language;
+            }
+            else
+            {
+                Console.WriteLine("Invalid response!");
+                return "";
+            }
+        }
+        catch
+        {
+            Console.WriteLine("Exception happened, return en!");
+            return "";
         }
     }
 
-    public async Task<string> Translate(string q, string target, string source)
+    public async Task<string> TranslateText(string q, string target, string source)
     {
         var response = await client.SendAsync(new HttpRequestMessage()
         {
